@@ -1,0 +1,28 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm test
+    environment:
+      - CI=true
+      - NODE_ENV=test
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run lint
+    environment:
+      - CI=true
+
+  typecheck:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm run typecheck
+    environment:
+      - CI=true
