@@ -1,21 +1,59 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Provider } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { store, useAppDispatch, useAppSelector, setInitialized } from './src/store';
+import {
+  store,
+  useAppDispatch,
+  useAppSelector,
+  restoreSessionThunk,
+  logoutThunk,
+} from './src/store';
 import { theme } from './src/theme';
 import { Typography } from './src/components/common/Typography';
 import { Button } from './src/components/common/Button';
 import { ScreenContainer } from './src/components/common/ScreenContainer';
-import { ENV } from './src/config/env';
+import { LoadingView } from './src/components/feedback/LoadingView';
+import { LoginScreen } from './src/features/auth/screens/LoginScreen';
+import { RegisterScreen } from './src/features/auth/screens/RegisterScreen';
 
 const AppContent: React.FC = () => {
   const dispatch = useAppDispatch();
-  const isInitialized = useAppSelector(state => state.app.isInitialized);
+  const { user, isAuthenticated, isRestoringSession } = useAppSelector(
+    state => state.auth,
+  );
+  const [authView, setAuthView] = useState<'login' | 'register'>('login');
+
+  useEffect(() => {
+    dispatch(restoreSessionThunk());
+  }, [dispatch]);
+
+  if (isRestoringSession) {
+    return (
+      <ScreenContainer testID="session-restoring-container">
+        <LoadingView message="Checking secure authentication session..." />
+      </ScreenContainer>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <ScreenContainer testID="auth-flow-container">
+        {authView === 'login' ? (
+          <LoginScreen onNavigateToRegister={() => setAuthView('register')} />
+        ) : (
+          <RegisterScreen
+            onNavigateToLogin={() => setAuthView('login')}
+            onRegistrationSuccess={() => setAuthView('login')}
+          />
+        )}
+      </ScreenContainer>
+    );
+  }
 
   return (
-    <ScreenContainer testID="scoreline-root-container">
-      <ScrollView contentContainerStyle={styles.scrollContent} testID="app-scroll-view">
+    <ScreenContainer testID="authenticated-root-container">
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Typography variant="h1" color="primary" align="center">
             Scoreline
@@ -36,26 +74,26 @@ const AppContent: React.FC = () => {
           </Typography>
         </View>
 
-        <View style={styles.card}>
-          <Typography variant="h3" style={styles.cardTitle}>
-            Foundation Status
+        <View style={styles.card} testID="user-profile-card">
+          <Typography variant="h2" style={styles.cardTitle}>
+            Welcome, {user?.firstName} {user?.lastName}
           </Typography>
           <Typography variant="body" color="secondary" style={styles.bodyText}>
-            Architecture: Feature-Based Modular System
+            Username: @{user?.username}
           </Typography>
           <Typography variant="body" color="secondary" style={styles.bodyText}>
-            Environment: {ENV.APP_ENV.toUpperCase()}
+            Email: {user?.email}
           </Typography>
-          <Typography variant="body" color="secondary" style={styles.bodyText}>
-            Initialized State: {isInitialized ? 'Ready' : 'Pending Initializer'}
+          <Typography variant="body" color="success" style={styles.bodyText}>
+            Status: Authenticated (Keychain Token Secured)
           </Typography>
 
           <View style={styles.buttonContainer}>
             <Button
-              testID="init-button"
-              title={isInitialized ? 'Platform Initialized' : 'Initialize Platform'}
-              onPress={() => dispatch(setInitialized(!isInitialized))}
-              variant={isInitialized ? 'secondary' : 'primary'}
+              testID="logout-button"
+              title="Sign Out"
+              variant="outline"
+              onPress={() => dispatch(logoutThunk())}
             />
           </View>
         </View>

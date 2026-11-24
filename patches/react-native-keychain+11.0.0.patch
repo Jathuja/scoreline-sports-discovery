@@ -1,0 +1,72 @@
+diff --git a/node_modules/react-native-keychain/src/NativeKeychainManager.ts b/node_modules/react-native-keychain/src/NativeKeychainManager.ts
+index ddd355a..54fe581 100644
+--- a/node_modules/react-native-keychain/src/NativeKeychainManager.ts
++++ b/node_modules/react-native-keychain/src/NativeKeychainManager.ts
+@@ -3,50 +3,50 @@ import { TurboModuleRegistry } from 'react-native';
+ 
+ export interface Spec extends TurboModule {
+   setGenericPasswordForOptions(
+-    options: CodegenTypes.UnsafeObject | null | undefined,
++    options?: UnsafeObject | null,
+     username: string,
+     password: string
+-  ): Promise<CodegenTypes.UnsafeObject | null>;
++  ): Promise<UnsafeObject | null>;
+   getGenericPasswordForOptions(
+-    options?: CodegenTypes.UnsafeObject | null
+-  ): Promise<false | CodegenTypes.UnsafeObject>;
++    options?: UnsafeObject | null
++  ): Promise<false | UnsafeObject>;
+   hasGenericPasswordForOptions(
+-    options?: CodegenTypes.UnsafeObject | null
++    options?: UnsafeObject | null
+   ): Promise<boolean>;
+   resetGenericPasswordForOptions(
+-    options?: CodegenTypes.UnsafeObject | null
++    options?: UnsafeObject | null
+   ): Promise<boolean>;
+   getAllGenericPasswordServices(
+-    options?: CodegenTypes.UnsafeObject | null
++    options?: UnsafeObject | null
+   ): Promise<string[]>;
+   getAllInternetCredentialServers(
+-    options?: CodegenTypes.UnsafeObject | null
++    options?: UnsafeObject | null
+   ): Promise<string[]>;
+   hasInternetCredentialsForOptions(
+-    options: CodegenTypes.UnsafeObject
++    options: UnsafeObject
+   ): Promise<boolean>;
+   setInternetCredentialsForServer(
+     server: string,
+     username: string,
+     password: string,
+-    options?: CodegenTypes.UnsafeObject | null
+-  ): Promise<CodegenTypes.UnsafeObject | null>;
++    options?: UnsafeObject | null
++  ): Promise<UnsafeObject | null>;
+   getInternetCredentialsForServer(
+     server: string,
+-    options?: CodegenTypes.UnsafeObject | null
+-  ): Promise<CodegenTypes.UnsafeObject | null>;
++    options?: UnsafeObject | null
++  ): Promise<UnsafeObject | null>;
+   resetInternetCredentialsForOptions(
+-    options: CodegenTypes.UnsafeObject
++    options: UnsafeObject
+   ): Promise<boolean>;
+   getSupportedBiometryType?(): Promise<string | null>;
+   canCheckAuthentication?(
+-    options?: CodegenTypes.UnsafeObject | null
++    options?: UnsafeObject | null
+   ): Promise<boolean>;
+   getSecurityLevel?(
+-    options?: CodegenTypes.UnsafeObject | null
++    options?: UnsafeObject | null
+   ): Promise<string | null>;
+   isPasscodeAuthAvailable?(): Promise<boolean>;
+-  requestSharedWebCredentials?(): Promise<CodegenTypes.UnsafeObject | null>;
++  requestSharedWebCredentials?(): Promise<UnsafeObject | null>;
+   setSharedWebCredentialsForServer?(
+     server: string,
+     username: string,

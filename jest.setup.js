@@ -22,3 +22,28 @@ jest.mock('react-native-safe-area-context', () => {
 
 // Mock react-native-vector-icons/Feather
 jest.mock('react-native-vector-icons/Feather', () => 'Icon');
+
+// Mock react-native-keychain
+let mockKeychainStorage: { username: string; password: string } | null = null;
+jest.mock('react-native-keychain', () => ({
+  setGenericPassword: jest.fn().mockImplementation((username, password) => {
+    mockKeychainStorage = { username, password };
+    return Promise.resolve(true);
+  }),
+  getGenericPassword: jest.fn().mockImplementation(() => {
+    return Promise.resolve(mockKeychainStorage);
+  }),
+  resetGenericPassword: jest.fn().mockImplementation(() => {
+    mockKeychainStorage = null;
+    return Promise.resolve(true);
+  }),
+  ACCESS_CONTROL: {
+    BIOMETRY_ANY: 'BIOMETRY_ANY',
+  },
+  ACCESSIBLE: {
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY: 'WHEN_UNLOCKED_THIS_DEVICE_ONLY',
+  },
+  AUTHENTICATION_TYPE: {
+    BIOMETRICS: 'BIOMETRICS',
+  },
+}));
