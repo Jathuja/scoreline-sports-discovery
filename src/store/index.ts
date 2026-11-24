@@ -23,4 +23,5 @@ export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export * from './slices/appSlice';
+export * from '../features/auth/slices/authSlice';
 export * from './rootReducer';

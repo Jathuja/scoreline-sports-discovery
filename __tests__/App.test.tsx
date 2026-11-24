@@ -1,24 +1,16 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import App from '../App';
 
-describe('Root Application Component', () => {
-  it('should render application branding, index number, and initial state', () => {
-    const { getByText, getByTestId } = render(<App />);
-
-    expect(getByText('Scoreline')).toBeTruthy();
-    expect(getByText('Sports Discovery Mobile Platform')).toBeTruthy();
-    expect(getByText('Index Number: 234089P')).toBeTruthy();
-    expect(getByTestId('scoreline-root-container')).toBeTruthy();
-  });
-
-  it('should toggle initialization state when button is pressed', () => {
+describe('Root Application & Auth State Integration', () => {
+  it('should render authentication flow when session is unauthenticated', async () => {
     const { getByTestId, getByText } = render(<App />);
 
-    const button = getByTestId('init-button');
-    expect(getByText('Initialize Platform')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('auth-flow-container')).toBeTruthy();
+    });
 
-    fireEvent.press(button);
-    expect(getByText('Platform Initialized')).toBeTruthy();
+    expect(getByText('Scoreline')).toBeTruthy();
+    expect(getByText('Sign in to your sports discovery account')).toBeTruthy();
   });
 });
