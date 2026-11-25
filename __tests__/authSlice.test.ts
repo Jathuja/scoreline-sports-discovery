@@ -89,6 +89,23 @@ describe('Redux Toolkit Auth Slice & Thunks', () => {
     expect(authState.error).toContain('Invalid username or password');
   });
 
+  it('should fallback to offline demo user when loginApi fails for demo credentials', async () => {
+    (authApi.loginApi as jest.Mock).mockRejectedValueOnce(new Error('Network Error'));
+    (keychain.saveAuthTokens as jest.Mock).mockResolvedValueOnce(true);
+
+    const store = setupStore();
+    await store.dispatch(loginThunk({ username: ' emilys ', password: 'emilyspass' }));
+
+    const authState = store.getState().auth;
+    expect(authState.isAuthenticated).toBe(true);
+    expect(authState.user?.username).toBe('emilys');
+    expect(keychain.saveAuthTokens).toHaveBeenCalledWith(
+      'mock-demo-jwt-token-emilys',
+      'mock-refresh-token',
+      'emilys',
+    );
+  });
+
   it('should handle registerThunk fulfilled', async () => {
     const mockCreatedUser = {
       id: 105,
