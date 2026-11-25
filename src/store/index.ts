@@ -24,4 +24,6 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 export * from './slices/appSlice';
 export * from '../features/auth/slices/authSlice';
+export * from '../features/discovery/slices/discoverySlice';
+export * from '../features/favourites/slices/favouritesSlice';
 export * from './rootReducer';

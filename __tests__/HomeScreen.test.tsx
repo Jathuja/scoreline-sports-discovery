@@ -48,4 +48,10 @@ describe('HomeScreen', () => {
     const { getByTestId } = render(<HomeScreen />, { wrapper });
     expect(getByTestId('quick-league-button')).toBeTruthy();
   });
+
+  it('renders sports categories section and default Soccer chip', () => {
+    const { getByTestId } = render(<HomeScreen />, { wrapper });
+    expect(getByTestId('home-categories-card')).toBeTruthy();
+    expect(getByTestId('sport-chip-Soccer')).toBeTruthy();
+  });
 });

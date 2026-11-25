@@ -7,7 +7,7 @@ export interface EnvironmentConfig {
 
 export const ENV: EnvironmentConfig = {
   APP_ENV: (process.env.APP_ENV as EnvironmentConfig['APP_ENV']) || 'development',
-  API_BASE_URL: process.env.API_BASE_URL || 'https://www.thesportsdb.com/api/v1/json/3',
+  API_BASE_URL: process.env.API_BASE_URL || 'https://www.thesportsdb.com/api/v1/json/123',
   AUTH_API_BASE_URL: process.env.AUTH_API_BASE_URL || 'https://dummyjson.com',
   APP_SCHEME: process.env.APP_SCHEME || 'scoreline',
 };

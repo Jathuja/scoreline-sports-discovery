@@ -109,6 +109,24 @@ jest.mock('@react-navigation/bottom-tabs', () => {
   };
 });
 
+// Mock @react-native-async-storage/async-storage
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  getItem: jest.fn(() => Promise.resolve(null)),
+  setItem: jest.fn(() => Promise.resolve()),
+  removeItem: jest.fn(() => Promise.resolve()),
+  clear: jest.fn(() => Promise.resolve()),
+  getAllKeys: jest.fn(() => Promise.resolve([])),
+  multiGet: jest.fn(() => Promise.resolve([])),
+  multiSet: jest.fn(() => Promise.resolve()),
+  mergeItem: jest.fn(() => Promise.resolve()),
+  flushGetRequests: jest.fn(),
+}));
+
+// Mock react-native Share
+jest.mock('react-native/Libraries/Share/Share', () => ({
+  share: jest.fn(() => Promise.resolve({ action: 'sharedAction' })),
+}));
+
 // Mock react-native-keychain
 let mockKeychainStorage: { username: string; password: string } | null = null;
 jest.mock('react-native-keychain', () => ({
