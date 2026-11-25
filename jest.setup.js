@@ -23,6 +23,92 @@ jest.mock('react-native-safe-area-context', () => {
 // Mock react-native-vector-icons/Feather
 jest.mock('react-native-vector-icons/Feather', () => 'Icon');
 
+// Mock react-native-screens
+jest.mock('react-native-screens', () => {
+  const { View } = require('react-native');
+  return {
+    enableScreens: jest.fn(),
+    ScreenContainer: View,
+    Screen: View,
+    NativeScreen: View,
+    NativeScreenContainer: View,
+    ScreenStack: View,
+    ScreenStackItem: View,
+    ScreenStackHeaderConfig: View,
+    ScreenStackHeaderSubview: View,
+    SearchBar: View,
+    Tabs: View,
+    compatibilityFlags: {},
+  };
+});
+
+// Mock @react-navigation/native
+jest.mock('@react-navigation/native', () => {
+  const actual = jest.requireActual('@react-navigation/native');
+  return {
+    ...actual,
+    NavigationContainer: ({ children }) => children,
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      dispatch: jest.fn(),
+      reset: jest.fn(),
+      canGoBack: jest.fn(() => false),
+    }),
+    useRoute: () => ({ params: { id: '133604', name: 'Arsenal' } }),
+    useFocusEffect: jest.fn(),
+    useIsFocused: jest.fn(() => true),
+  };
+});
+
+// Mock @react-navigation/native-stack
+jest.mock('@react-navigation/native-stack', () => {
+  return {
+    createNativeStackNavigator: () => ({
+      Navigator: ({ children }) => children,
+      Screen: ({ children, component: Component }) => {
+        const mockNav = {
+          navigate: jest.fn(),
+          goBack: jest.fn(),
+          dispatch: jest.fn(),
+          reset: jest.fn(),
+          canGoBack: jest.fn(() => false),
+        };
+        const mockRoute = { params: { id: '133604', name: 'Arsenal' } };
+        if (Component) {
+          return require('react').createElement(Component, {
+            navigation: mockNav,
+            route: mockRoute,
+          });
+        }
+        if (typeof children === 'function') {
+          return children({ navigation: mockNav, route: mockRoute });
+        }
+        return require('react').createElement(require('react-native').View, null);
+      },
+    }),
+  };
+});
+
+// Mock @react-navigation/bottom-tabs
+jest.mock('@react-navigation/bottom-tabs', () => {
+  return {
+    createBottomTabNavigator: () => ({
+      Navigator: ({ children }) => children,
+      Screen: ({ component: Component }) => {
+        const mockNav = { navigate: jest.fn(), goBack: jest.fn() };
+        if (Component) {
+          return require('react').createElement(Component, {
+            navigation: mockNav,
+            route: { params: {} },
+          });
+        }
+        return require('react').createElement(require('react-native').View, null);
+      },
+    }),
+  };
+});
+
 // Mock react-native-keychain
 let mockKeychainStorage: { username: string; password: string } | null = null;
 jest.mock('react-native-keychain', () => ({
