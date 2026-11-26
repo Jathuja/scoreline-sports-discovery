@@ -7,7 +7,8 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { theme } from '../../theme';
+import Icon from 'react-native-vector-icons/Feather';
+import { theme, useAppTheme } from '../../theme';
 import { BaseButtonProps, ButtonVariant, ButtonSize } from '../../types/common';
 
 export const Button: React.FC<BaseButtonProps> = ({
@@ -17,70 +18,78 @@ export const Button: React.FC<BaseButtonProps> = ({
   size = 'md',
   disabled = false,
   loading = false,
+  icon,
+  iconPosition = 'left',
   style,
   textStyle,
   accessibilityLabel,
   testID,
 }) => {
+  const activeTheme = useAppTheme();
+
   const getContainerVariantStyle = (v: ButtonVariant): ViewStyle => {
     switch (v) {
       case 'secondary':
-        return { backgroundColor: theme.colors.secondary };
+        return { backgroundColor: activeTheme.colors.secondary };
       case 'outline':
         return {
           backgroundColor: 'transparent',
           borderWidth: 1.5,
-          borderColor: theme.colors.primary,
+          borderColor: activeTheme.colors.primary,
         };
       case 'ghost':
         return { backgroundColor: 'transparent' };
       case 'danger':
-        return { backgroundColor: theme.colors.error };
+        return { backgroundColor: activeTheme.colors.error };
       case 'primary':
       default:
-        return { backgroundColor: theme.colors.primary };
+        return { backgroundColor: activeTheme.colors.primary };
     }
   };
 
-  const getTextVariantStyle = (v: ButtonVariant): TextStyle => {
+  const getTextColor = (v: ButtonVariant): string => {
     switch (v) {
       case 'outline':
       case 'ghost':
-        return { color: theme.colors.primary };
+        return activeTheme.colors.primary;
       case 'primary':
       case 'secondary':
       case 'danger':
       default:
-        return { color: theme.colors.textInverse };
+        return activeTheme.colors.textInverse;
     }
   };
 
+  const getTextVariantStyle = (v: ButtonVariant): TextStyle => ({
+    color: getTextColor(v),
+  });
+
   const getSizeStyle = (s: ButtonSize): ViewStyle => {
-    // Guarantees compliance with minimum 44pt / 48dp touch targets across all sizes
     switch (s) {
       case 'sm':
         return {
-          minHeight: theme.layout.touchTargets.minHeight, // 48
-          paddingHorizontal: theme.spacing.md,
-          paddingVertical: theme.spacing.xs,
+          minHeight: activeTheme.layout.touchTargets.minHeight,
+          paddingHorizontal: activeTheme.spacing.md,
+          paddingVertical: activeTheme.spacing.xs,
         };
       case 'lg':
         return {
           minHeight: 56,
-          paddingHorizontal: theme.spacing.xl,
-          paddingVertical: theme.spacing.md,
+          paddingHorizontal: activeTheme.spacing.xl,
+          paddingVertical: activeTheme.spacing.md,
         };
       case 'md':
       default:
         return {
-          minHeight: theme.layout.touchTargets.minHeight, // 48
-          paddingHorizontal: theme.spacing.lg,
-          paddingVertical: theme.spacing.sm,
+          minHeight: activeTheme.layout.touchTargets.minHeight,
+          paddingHorizontal: activeTheme.spacing.lg,
+          paddingVertical: activeTheme.spacing.sm,
         };
     }
   };
 
   const isInteractive = !disabled && !loading;
+  const fgColor = disabled ? activeTheme.colors.textTertiary : getTextColor(variant);
 
   return (
     <Pressable
@@ -88,33 +97,44 @@ export const Button: React.FC<BaseButtonProps> = ({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || title}
       accessibilityState={{ disabled: !isInteractive, busy: loading }}
-      hitSlop={theme.layout.hitSlop}
+      hitSlop={activeTheme.layout.hitSlop}
       disabled={!isInteractive}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
         getSizeStyle(size),
         getContainerVariantStyle(variant),
-        disabled && styles.disabled,
+        disabled && {
+          opacity: 0.5,
+          backgroundColor: activeTheme.colors.border,
+        },
         pressed && isInteractive && styles.pressed,
         style,
       ]}>
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === 'outline' || variant === 'ghost' ? theme.colors.primary : theme.colors.textInverse}
+          color={fgColor}
           testID={`${testID || 'button'}-loading`}
         />
       ) : (
-        <Text
-          style={[
-            styles.text,
-            getTextVariantStyle(variant),
-            disabled && styles.disabledText,
-            textStyle,
-          ]}>
-          {title}
-        </Text>
+        <>
+          {icon && iconPosition === 'left' ? (
+            <Icon name={icon} size={16} color={fgColor} style={styles.iconLeft} />
+          ) : null}
+          <Text
+            style={[
+              styles.text,
+              getTextVariantStyle(variant),
+              disabled && { color: activeTheme.colors.textTertiary },
+              textStyle,
+            ]}>
+            {title}
+          </Text>
+          {icon && iconPosition === 'right' ? (
+            <Icon name={icon} size={16} color={fgColor} style={styles.iconRight} />
+          ) : null}
+        </>
       )}
     </Pressable>
   );
@@ -126,7 +146,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.layout.borderRadius.sm,
-    minWidth: theme.layout.touchTargets.minWidth, // 48
+    minWidth: theme.layout.touchTargets.minWidth,
   },
   text: {
     fontSize: theme.typography.fontSizes.md,
@@ -134,14 +154,13 @@ const styles = StyleSheet.create({
     lineHeight: theme.typography.lineHeights.md,
     textAlign: 'center',
   },
+  iconLeft: {
+    marginRight: 8,
+  },
+  iconRight: {
+    marginLeft: 8,
+  },
   pressed: {
     opacity: 0.8,
-  },
-  disabled: {
-    opacity: 0.5,
-    backgroundColor: theme.colors.border,
-  },
-  disabledText: {
-    color: theme.colors.textTertiary,
   },
 });

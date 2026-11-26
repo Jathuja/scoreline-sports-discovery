@@ -1,7 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Image,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { theme } from '../../../theme';
+import Icon from 'react-native-vector-icons/Feather';
+import { theme, useAppTheme } from '../../../theme';
 import { Typography } from '../../../components/common/Typography';
 import { Button } from '../../../components/common/Button';
 import { ScreenContainer } from '../../../components/common/ScreenContainer';
@@ -17,6 +25,7 @@ const DEFAULT_SPORTS = ['Soccer', 'Basketball', 'Tennis', 'Cricket', 'Motorsport
 export const HomeScreen: React.FC = () => {
   const tabNavigation = useNavigation<MainTabNavProp>();
   const rootNavigation = useNavigation<RootStackNavigationProp>();
+  const activeTheme = useAppTheme();
   const dispatch = useAppDispatch();
   const { sports, searchLeagues, isSearching } = useAppSelector(
     state => state.discovery,
@@ -40,6 +49,14 @@ export const HomeScreen: React.FC = () => {
       ? sports.slice(0, 8).map(s => s.strSport)
       : DEFAULT_SPORTS;
 
+  const cardStyle = [
+    styles.card,
+    {
+      backgroundColor: activeTheme.colors.surface,
+      borderColor: activeTheme.colors.border,
+    },
+  ];
+
   return (
     <ScreenContainer testID="home-screen-container">
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -55,7 +72,7 @@ export const HomeScreen: React.FC = () => {
           </Typography>
         </View>
 
-        <View style={styles.card} testID="home-overview-card">
+        <View style={cardStyle} testID="home-overview-card">
           <Typography variant="h2" style={styles.cardTitle}>
             Discover Sports
           </Typography>
@@ -66,6 +83,7 @@ export const HomeScreen: React.FC = () => {
             <Button
               testID="home-explore-search-button"
               title="Search Sports"
+              icon="search"
               variant="primary"
               onPress={() => tabNavigation.navigate('SearchTab')}
               style={styles.actionButton}
@@ -73,7 +91,7 @@ export const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-        <View style={styles.card} testID="home-categories-card">
+        <View style={cardStyle} testID="home-categories-card">
           <Typography variant="h3" style={styles.cardTitle}>
             Browse Sports Categories
           </Typography>
@@ -87,11 +105,28 @@ export const HomeScreen: React.FC = () => {
                 <TouchableOpacity
                   key={sport}
                   testID={`sport-chip-${sport}`}
-                  style={[styles.chip, active && styles.chipActive]}
+                  style={[
+                    styles.chip,
+                    {
+                      borderColor: active
+                        ? activeTheme.colors.primary
+                        : activeTheme.colors.border,
+                      backgroundColor: active
+                        ? activeTheme.colors.primary
+                        : activeTheme.colors.surfaceSubtle,
+                    },
+                  ]}
                   onPress={() => handleSelectSport(sport)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  activeOpacity={0.7}>
+                  <Text
+                    style={[
+                      styles.chipText,
+                      {
+                        color: active
+                          ? activeTheme.colors.textInverse
+                          : activeTheme.colors.textPrimary,
+                      },
+                    ]}>
                     {sport}
                   </Text>
                 </TouchableOpacity>
@@ -100,7 +135,12 @@ export const HomeScreen: React.FC = () => {
           </View>
 
           {selectedSport ? (
-            <View testID="home-discovered-leagues" style={styles.discoveredSection}>
+            <View
+              testID="home-discovered-leagues"
+              style={[
+                styles.discoveredSection,
+                { borderTopColor: activeTheme.colors.border },
+              ]}>
               <Typography variant="caption" color="secondary" style={styles.discoveredHeader}>
                 {isSearching
                   ? `Loading ${selectedSport} leagues...`
@@ -111,31 +151,68 @@ export const HomeScreen: React.FC = () => {
                   <TouchableOpacity
                     key={league.idLeague}
                     testID={`home-league-${league.idLeague}`}
-                    style={styles.leagueRow}
+                    style={[
+                      styles.leagueRow,
+                      { borderBottomColor: activeTheme.colors.border },
+                    ]}
                     onPress={() =>
                       rootNavigation.navigate('LeagueDetails', {
                         id: league.idLeague,
                         name: league.strLeague,
                       })
                     }
-                    activeOpacity={0.7}
-                  >
+                    activeOpacity={0.7}>
+                    {league.strBadge ? (
+                      <Image
+                        source={{ uri: league.strBadge }}
+                        style={styles.leagueBadge}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <View
+                        style={[
+                          styles.leagueBadge,
+                          styles.leagueBadgePlaceholder,
+                          { backgroundColor: activeTheme.colors.surfaceSubtle },
+                        ]}>
+                        <Icon
+                          name="award"
+                          size={16}
+                          color={activeTheme.colors.primary}
+                        />
+                      </View>
+                    )}
                     <View style={styles.leagueInfo}>
-                      <Text style={styles.leagueName} numberOfLines={1}>
+                      <Text
+                        style={[
+                          styles.leagueName,
+                          { color: activeTheme.colors.textPrimary },
+                        ]}
+                        numberOfLines={1}>
                         {league.strLeague}
                       </Text>
                       {league.strCountry ? (
-                        <Text style={styles.leagueCountry}>{league.strCountry}</Text>
+                        <Text
+                          style={[
+                            styles.leagueCountry,
+                            { color: activeTheme.colors.textSecondary },
+                          ]}>
+                          {league.strCountry}
+                        </Text>
                       ) : null}
                     </View>
-                    <Text style={styles.chevron}>›</Text>
+                    <Icon
+                      name="chevron-right"
+                      size={18}
+                      color={activeTheme.colors.textSecondary}
+                    />
                   </TouchableOpacity>
                 ))}
             </View>
           ) : null}
         </View>
 
-        <View style={styles.card} testID="home-quick-links-card">
+        <View style={cardStyle} testID="home-quick-links-card">
           <Typography variant="h3" style={styles.cardTitle}>
             Quick Jump (Deep Link Demo)
           </Typography>
@@ -146,17 +223,29 @@ export const HomeScreen: React.FC = () => {
             <Button
               testID="quick-team-button"
               title="Arsenal FC (#133604)"
+              icon="shield"
               variant="outline"
               size="sm"
-              onPress={() => rootNavigation.navigate('TeamDetails', { id: '133604', name: 'Arsenal' })}
+              onPress={() =>
+                rootNavigation.navigate('TeamDetails', {
+                  id: '133604',
+                  name: 'Arsenal',
+                })
+              }
               style={styles.quickButton}
             />
             <Button
               testID="quick-league-button"
               title="English Premier League (#4328)"
+              icon="award"
               variant="outline"
               size="sm"
-              onPress={() => rootNavigation.navigate('LeagueDetails', { id: '4328', name: 'Premier League' })}
+              onPress={() =>
+                rootNavigation.navigate('LeagueDetails', {
+                  id: '4328',
+                  name: 'Premier League',
+                })
+              }
               style={styles.quickButton}
             />
           </View>
@@ -180,11 +269,9 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.xs,
   },
   card: {
-    backgroundColor: theme.colors.surface,
     padding: theme.spacing.lg,
     borderRadius: theme.layout.borderRadius.md,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     marginBottom: theme.spacing.md,
   },
   cardTitle: {
@@ -209,28 +296,17 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.sm,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.surfaceSubtle,
     minHeight: theme.layout.touchTargets.minHeight,
     justifyContent: 'center',
-  },
-  chipActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
   },
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
-  },
-  chipTextActive: {
-    color: theme.colors.textInverse,
   },
   discoveredSection: {
     marginTop: theme.spacing.md,
     paddingTop: theme.spacing.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: theme.colors.border,
   },
   discoveredHeader: {
     marginBottom: theme.spacing.sm,
@@ -241,8 +317,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: theme.spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.colors.border,
     minHeight: theme.layout.touchTargets.minHeight,
+  },
+  leagueBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    marginRight: theme.spacing.sm,
+  },
+  leagueBadgePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   leagueInfo: {
     flex: 1,
@@ -250,17 +335,10 @@ const styles = StyleSheet.create({
   leagueName: {
     fontSize: 14,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
   },
   leagueCountry: {
     fontSize: 12,
-    color: theme.colors.textSecondary,
     marginTop: 2,
-  },
-  chevron: {
-    fontSize: 18,
-    color: theme.colors.textSecondary,
-    marginLeft: theme.spacing.sm,
   },
   quickLinks: {
     gap: theme.spacing.sm,

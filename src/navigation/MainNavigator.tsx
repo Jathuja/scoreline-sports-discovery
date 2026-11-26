@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { theme } from '../theme';
+import { theme, useAppTheme } from '../theme';
 import { TabNavigator } from './TabNavigator';
 import { TeamDetailsScreen } from '../features/details/screens/TeamDetailsScreen';
 import { LeagueDetailsScreen } from '../features/details/screens/LeagueDetailsScreen';
@@ -10,17 +10,19 @@ import type { RootStackParamList } from './types';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export const MainNavigator: React.FC = () => {
+  const activeTheme = useAppTheme();
+
   return (
     <Stack.Navigator
       initialRouteName="Main"
       screenOptions={{
         headerStyle: {
-          backgroundColor: theme.colors.surface,
+          backgroundColor: activeTheme.colors.surface,
         },
-        headerTintColor: theme.colors.primary,
+        headerTintColor: activeTheme.colors.primary,
         headerTitleStyle: {
           fontWeight: theme.typography.fontWeights.semiBold,
-          color: theme.colors.textPrimary,
+          color: activeTheme.colors.textPrimary,
         },
       }}>
       <Stack.Screen

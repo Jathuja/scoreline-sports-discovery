@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import { useAppTheme } from '../../theme';
 import { Typography } from '../common/Typography';
 import { StateFeedbackProps } from '../../types/common';
 
@@ -15,13 +15,19 @@ export const LoadingView: React.FC<LoadingViewProps> = ({
   size = 'large',
   testID = 'loading-view',
 }) => {
+  const activeTheme = useAppTheme();
+
   return (
     <View
-      style={[styles.container, style]}
+      style={[
+        styles.container,
+        { backgroundColor: activeTheme.colors.background },
+        style,
+      ]}
       testID={testID}
       accessibilityRole="progressbar"
       accessibilityLabel={message}>
-      <ActivityIndicator size={size} color={theme.colors.primary} />
+      <ActivityIndicator size={size} color={activeTheme.colors.primary} />
       {message ? (
         <Typography
           variant="body"
@@ -40,9 +46,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: 32,
   },
   message: {
-    marginTop: theme.spacing.md,
+    marginTop: 16,
   },
 });

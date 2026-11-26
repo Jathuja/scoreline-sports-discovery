@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/Feather';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { loadFavouritesThunk, removeFavouriteThunk } from '../slices/favouritesSlice';
 import { FavouriteItem } from '../../../services/storage';
-import { theme } from '../../../theme';
+import { theme, useAppTheme } from '../../../theme';
 import { LoadingView, EmptyStateView } from '../../../components';
 import { RootStackParamList } from '../../../navigation/types';
 
@@ -21,6 +22,7 @@ type FavNavProp = NativeStackNavigationProp<RootStackParamList>;
 export const FavouritesScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<FavNavProp>();
+  const activeTheme = useAppTheme();
   const { items, isLoading, isLoaded } = useAppSelector(
     state => state.favourites,
   );
@@ -53,12 +55,19 @@ export const FavouritesScreen: React.FC = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: FavouriteItem }) => (
-      <View testID={`favourite-row-${item.id}`} style={styles.row}>
+      <View
+        testID={`favourite-row-${item.id}`}
+        style={[
+          styles.row,
+          {
+            backgroundColor: activeTheme.colors.surface,
+            borderColor: activeTheme.colors.border,
+          },
+        ]}>
         <TouchableOpacity
           style={styles.rowContent}
           onPress={() => handlePress(item)}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           {item.badge ? (
             <Image
               testID={`favourite-badge-${item.id}`}
@@ -67,17 +76,29 @@ export const FavouritesScreen: React.FC = () => {
               resizeMode="contain"
             />
           ) : (
-            <View style={[styles.badge, styles.badgePlaceholder]}>
+            <View
+              style={[
+                styles.badge,
+                styles.badgePlaceholder,
+                { backgroundColor: activeTheme.colors.primary },
+              ]}>
               <Text style={styles.badgeInitial}>
                 {item.name[0]?.toUpperCase() ?? '?'}
               </Text>
             </View>
           )}
           <View style={styles.rowText}>
-            <Text testID={`favourite-name-${item.id}`} style={styles.rowTitle} numberOfLines={1}>
+            <Text
+              testID={`favourite-name-${item.id}`}
+              style={[styles.rowTitle, { color: activeTheme.colors.textPrimary }]}
+              numberOfLines={1}>
               {item.name}
             </Text>
-            <Text style={styles.rowSubtitle}>
+            <Text
+              style={[
+                styles.rowSubtitle,
+                { color: activeTheme.colors.textSecondary },
+              ]}>
               {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
             </Text>
           </View>
@@ -85,14 +106,14 @@ export const FavouritesScreen: React.FC = () => {
         <TouchableOpacity
           testID={`remove-favourite-${item.id}`}
           style={styles.removeButton}
+          accessibilityLabel={`Remove ${item.name}`}
           onPress={() => handleRemove(item.id)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.removeIcon}>✕</Text>
+          hitSlop={activeTheme.layout.hitSlop}>
+          <Icon name="x" size={18} color={activeTheme.colors.textSecondary} />
         </TouchableOpacity>
       </View>
     ),
-    [handlePress, handleRemove],
+    [handlePress, handleRemove, activeTheme],
   );
 
   if (isLoading && !isLoaded) {
@@ -100,11 +121,25 @@ export const FavouritesScreen: React.FC = () => {
   }
 
   return (
-    <View testID="favourites-screen" style={styles.container}>
+    <View
+      testID="favourites-screen"
+      style={[
+        styles.container,
+        { backgroundColor: activeTheme.colors.background },
+      ]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Favourites</Text>
+        <Text
+          style={[styles.headerTitle, { color: activeTheme.colors.textPrimary }]}>
+          My Favourites
+        </Text>
         {items.length > 0 && (
-          <Text style={styles.headerCount}>{items.length} saved</Text>
+          <Text
+            style={[
+              styles.headerCount,
+              { color: activeTheme.colors.textSecondary },
+            ]}>
+            {items.length} saved
+          </Text>
         )}
       </View>
 
@@ -113,6 +148,7 @@ export const FavouritesScreen: React.FC = () => {
           testID="favourites-empty"
           title="No Favourites Yet"
           message="No favourites yet. Search for teams, leagues, or players and tap the heart to save them!"
+          icon="heart"
         />
       ) : (
         <FlatList
@@ -130,7 +166,6 @@ export const FavouritesScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -142,11 +177,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: theme.colors.textPrimary,
   },
   headerCount: {
     fontSize: 13,
-    color: theme.colors.textSecondary,
   },
   list: {
     paddingHorizontal: theme.spacing.md,
@@ -155,8 +188,8 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
     borderRadius: 10,
+    borderWidth: 1,
     marginBottom: theme.spacing.sm,
     minHeight: theme.layout.touchTargets.minHeight,
   },
@@ -173,7 +206,6 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.md,
   },
   badgePlaceholder: {
-    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -186,22 +218,16 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
   },
   rowSubtitle: {
     fontSize: 12,
-    color: theme.colors.textSecondary,
     marginTop: 2,
   },
   removeButton: {
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.md,
+    minWidth: theme.layout.touchTargets.minWidth,
     minHeight: theme.layout.touchTargets.minHeight,
+    alignItems: 'center',
     justifyContent: 'center',
-  },
-  removeIcon: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
   },
 });
 

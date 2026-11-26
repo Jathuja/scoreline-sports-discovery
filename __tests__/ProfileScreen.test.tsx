@@ -1,7 +1,8 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Provider } from 'react-redux';
-import { store } from '../src/store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { store, setupStore } from '../src/store';
 import { ProfileScreen } from '../src/features/profile/screens/ProfileScreen';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -39,5 +40,25 @@ describe('ProfileScreen', () => {
   it('renders sign out button with correct label', () => {
     const { getByText } = render(<ProfileScreen />, { wrapper });
     expect(getByText('Sign Out')).toBeTruthy();
+  });
+
+  it('renders remembered dark mode toggle and persists theme choice', async () => {
+    const testStore = setupStore();
+    const { getByTestId, getByText } = render(
+      <Provider store={testStore}>
+        <ProfileScreen />
+      </Provider>,
+    );
+
+    expect(getByText('Dark Mode')).toBeTruthy();
+    const toggle = getByTestId('dark-mode-switch');
+    expect(toggle.props.value).toBe(false);
+
+    fireEvent(toggle, 'valueChange', true);
+
+    await waitFor(() => {
+      expect(testStore.getState().app.themeMode).toBe('dark');
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('@scoreline/theme', 'dark');
+    });
   });
 });

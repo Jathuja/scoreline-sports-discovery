@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextStyle, StyleSheet, StyleProp } from 'react-native';
-import { theme } from '../../theme';
+import { theme, useAppTheme } from '../../theme';
 
 export type TypographyVariant =
   | 'h1'
@@ -40,13 +40,15 @@ export const Typography: React.FC<TypographyProps> = ({
   testID,
   accessibilityLabel,
 }) => {
+  const activeTheme = useAppTheme();
+
   const textColorMap: Record<TypographyColor, string> = {
-    primary: theme.colors.textPrimary,
-    secondary: theme.colors.textSecondary,
-    tertiary: theme.colors.textTertiary,
-    inverse: theme.colors.textInverse,
-    error: theme.colors.error,
-    success: theme.colors.success,
+    primary: activeTheme.colors.textPrimary,
+    secondary: activeTheme.colors.textSecondary,
+    tertiary: activeTheme.colors.textTertiary,
+    inverse: activeTheme.colors.textInverse,
+    error: activeTheme.colors.error,
+    success: activeTheme.colors.success,
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { registerThunk, clearAuthError } from '../slices/authSlice';
-import { theme } from '../../../theme';
+import { theme, useAppTheme } from '../../../theme';
 import { Typography } from '../../../components/common/Typography';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
@@ -17,6 +17,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
   onRegistrationSuccess,
 }) => {
   const dispatch = useAppDispatch();
+  const activeTheme = useAppTheme();
   const { isLoading, error } = useAppSelector(state => state.auth);
 
   const [firstName, setFirstName] = useState('');
@@ -96,7 +97,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({
         </Typography>
       </View>
 
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: activeTheme.colors.surface,
+            borderColor: activeTheme.colors.border,
+          },
+        ]}>
         <Typography variant="h3" style={styles.cardTitle}>
           Create Account
         </Typography>

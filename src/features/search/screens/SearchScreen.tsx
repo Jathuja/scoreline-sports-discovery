@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/Feather';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import {
   searchTeamsThunk,
@@ -17,7 +18,7 @@ import {
   searchPlayersThunk,
   clearSearchResults,
 } from '../../discovery/slices/discoverySlice';
-import { theme } from '../../../theme';
+import { theme, useAppTheme } from '../../../theme';
 import { LoadingView, EmptyStateView, ErrorView } from '../../../components';
 import { RootStackParamList } from '../../../navigation/types';
 import { Team, League, Player } from '../../discovery/types';
@@ -25,12 +26,14 @@ import { Team, League, Player } from '../../discovery/types';
 type SearchNavProp = NativeStackNavigationProp<RootStackParamList>;
 type SearchTab = 'teams' | 'leagues' | 'players';
 
-const DEBOUNCE_MS = 300;
+const DEBOUNCE_MS = 350;
 
-const BadgeImage: React.FC<{ uri?: string; testID?: string }> = ({
+const BadgeImage: React.FC<{ uri?: string; testID?: string; iconName?: string }> = ({
   uri,
   testID,
+  iconName = 'shield',
 }) => {
+  const activeTheme = useAppTheme();
   if (uri) {
     return (
       <Image
@@ -41,12 +44,23 @@ const BadgeImage: React.FC<{ uri?: string; testID?: string }> = ({
       />
     );
   }
-  return <View testID={testID} style={[styles.badge, styles.badgePlaceholder]} />;
+  return (
+    <View
+      testID={testID}
+      style={[
+        styles.badge,
+        styles.badgePlaceholder,
+        { backgroundColor: activeTheme.colors.surfaceSubtle },
+      ]}>
+      <Icon name={iconName} size={20} color={activeTheme.colors.primary} />
+    </View>
+  );
 };
 
 export const SearchScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<SearchNavProp>();
+  const activeTheme = useAppTheme();
   const { searchTeams, searchLeagues, searchPlayers, isSearching, searchError } =
     useAppSelector(state => state.discovery);
 
@@ -103,94 +117,144 @@ export const SearchScreen: React.FC = () => {
     }
   }, [dispatch]);
 
+  const rowDynamicStyle = useMemo(
+    () => ({
+      backgroundColor: activeTheme.colors.surface,
+      borderColor: activeTheme.colors.border,
+    }),
+    [activeTheme.colors.surface, activeTheme.colors.border],
+  );
+
   const renderTeamItem = useCallback(
     ({ item }: { item: Team }) => (
       <TouchableOpacity
         testID={`team-row-${item.idTeam}`}
-        style={styles.row}
+        style={[styles.row, rowDynamicStyle]}
         onPress={() =>
           navigation.navigate('TeamDetails', {
             id: item.idTeam,
             name: item.strTeam,
           })
         }
-        activeOpacity={0.7}
-      >
+        activeOpacity={0.7}>
         <BadgeImage
           uri={item.strBadge || item.strTeamBadge}
           testID={`team-badge-${item.idTeam}`}
+          iconName="shield"
         />
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
+          <Text
+            style={[styles.rowTitle, { color: activeTheme.colors.textPrimary }]}
+            numberOfLines={1}>
             {item.strTeam}
           </Text>
           {item.strLeague ? (
-            <Text style={styles.rowSubtitle} numberOfLines={1}>
+            <Text
+              style={[
+                styles.rowSubtitle,
+                { color: activeTheme.colors.textSecondary },
+              ]}
+              numberOfLines={1}>
               {item.strLeague}
             </Text>
           ) : null}
         </View>
+        <Icon
+          name="chevron-right"
+          size={18}
+          color={activeTheme.colors.textSecondary}
+        />
       </TouchableOpacity>
     ),
-    [navigation],
+    [navigation, activeTheme, rowDynamicStyle],
   );
 
   const renderLeagueItem = useCallback(
     ({ item }: { item: League }) => (
       <TouchableOpacity
         testID={`league-row-${item.idLeague}`}
-        style={styles.row}
+        style={[styles.row, rowDynamicStyle]}
         onPress={() =>
           navigation.navigate('LeagueDetails', {
             id: item.idLeague,
             name: item.strLeague,
           })
         }
-        activeOpacity={0.7}
-      >
-        <BadgeImage uri={item.strBadge} testID={`league-badge-${item.idLeague}`} />
+        activeOpacity={0.7}>
+        <BadgeImage
+          uri={item.strBadge}
+          testID={`league-badge-${item.idLeague}`}
+          iconName="award"
+        />
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
+          <Text
+            style={[styles.rowTitle, { color: activeTheme.colors.textPrimary }]}
+            numberOfLines={1}>
             {item.strLeague}
           </Text>
           {item.strSport ? (
-            <Text style={styles.rowSubtitle} numberOfLines={1}>
+            <Text
+              style={[
+                styles.rowSubtitle,
+                { color: activeTheme.colors.textSecondary },
+              ]}
+              numberOfLines={1}>
               {item.strSport}
             </Text>
           ) : null}
         </View>
+        <Icon
+          name="chevron-right"
+          size={18}
+          color={activeTheme.colors.textSecondary}
+        />
       </TouchableOpacity>
     ),
-    [navigation],
+    [navigation, activeTheme, rowDynamicStyle],
   );
 
   const renderPlayerItem = useCallback(
     ({ item }: { item: Player }) => (
       <TouchableOpacity
         testID={`player-row-${item.idPlayer}`}
-        style={styles.row}
+        style={[styles.row, rowDynamicStyle]}
         onPress={() =>
           navigation.navigate('PlayerDetails', {
             id: item.idPlayer,
             name: item.strPlayer,
           })
         }
-        activeOpacity={0.7}
-      >
-        <BadgeImage uri={item.strThumb} testID={`player-thumb-${item.idPlayer}`} />
+        activeOpacity={0.7}>
+        <BadgeImage
+          uri={item.strThumb}
+          testID={`player-thumb-${item.idPlayer}`}
+          iconName="user"
+        />
         <View style={styles.rowText}>
-          <Text style={styles.rowTitle} numberOfLines={1}>
+          <Text
+            style={[styles.rowTitle, { color: activeTheme.colors.textPrimary }]}
+            numberOfLines={1}>
             {item.strPlayer}
           </Text>
           {item.strTeam ? (
-            <Text style={styles.rowSubtitle} numberOfLines={1}>
+            <Text
+              style={[
+                styles.rowSubtitle,
+                { color: activeTheme.colors.textSecondary },
+              ]}
+              numberOfLines={1}>
               {item.strPosition ? `${item.strPosition} · ${item.strTeam}` : item.strTeam}
             </Text>
           ) : null}
         </View>
+        <Icon
+          name="chevron-right"
+          size={18}
+          color={activeTheme.colors.textSecondary}
+        />
       </TouchableOpacity>
     ),
-    [navigation],
+    [navigation, activeTheme, rowDynamicStyle],
   );
 
   const getActiveData = () => {
@@ -212,7 +276,7 @@ export const SearchScreen: React.FC = () => {
         <ErrorView
           testID="search-error"
           message={searchError}
-          onRetry={() => runSearch(query)}
+          onRetry={() => runSearch(query, activeTab)}
         />
       );
     }
@@ -222,6 +286,7 @@ export const SearchScreen: React.FC = () => {
           testID="search-empty-initial"
           title="Discover Sports"
           message="Search for teams, leagues, or players"
+          icon="search"
         />
       );
     }
@@ -232,6 +297,7 @@ export const SearchScreen: React.FC = () => {
           testID="search-empty-results"
           title="No Results"
           message={`No ${activeTab} found for "${query}"`}
+          icon="search"
         />
       );
     }
@@ -274,14 +340,31 @@ export const SearchScreen: React.FC = () => {
   const tabs: SearchTab[] = ['teams', 'leagues', 'players'];
 
   return (
-    <View testID="search-screen" style={styles.container}>
-      {/* Search bar */}
-      <View style={styles.searchBar}>
+    <View
+      testID="search-screen"
+      style={[
+        styles.container,
+        { backgroundColor: activeTheme.colors.background },
+      ]}>
+      <View
+        style={[
+          styles.searchBar,
+          {
+            backgroundColor: activeTheme.colors.surface,
+            borderColor: activeTheme.colors.border,
+          },
+        ]}>
+        <Icon
+          name="search"
+          size={18}
+          color={activeTheme.colors.textSecondary}
+          style={styles.searchIcon}
+        />
         <TextInput
           testID="search-input"
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: activeTheme.colors.textPrimary }]}
           placeholder="Search sports..."
-          placeholderTextColor={theme.colors.textSecondary}
+          placeholderTextColor={activeTheme.colors.textSecondary}
           value={query}
           onChangeText={handleQueryChange}
           returnKeyType="search"
@@ -293,44 +376,51 @@ export const SearchScreen: React.FC = () => {
             testID="search-clear"
             onPress={handleClear}
             style={styles.clearButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.clearText}>✕</Text>
+            accessibilityLabel="Clear search"
+            hitSlop={activeTheme.layout.hitSlop}>
+            <Icon name="x" size={18} color={activeTheme.colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Tabs */}
       <View testID="search-tabs" style={styles.tabs}>
-        {tabs.map(tab => (
-          <TouchableOpacity
-            key={tab}
-            testID={`tab-${tab}`}
-            style={[styles.tab, activeTab === tab && styles.tabActive]}
-            onPress={() => handleTabChange(tab)}
-          >
-            <Text
+        {tabs.map(tab => {
+          const isActive = activeTab === tab;
+          return (
+            <TouchableOpacity
+              key={tab}
+              testID={`tab-${tab}`}
               style={[
-                styles.tabText,
-                activeTab === tab && styles.tabTextActive,
+                styles.tab,
+                isActive && { borderBottomColor: activeTheme.colors.primary },
               ]}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              {tab === 'teams' && searchTeams.length > 0
-                ? ` (${searchTeams.length})`
-                : ''}
-              {tab === 'leagues' && searchLeagues.length > 0
-                ? ` (${searchLeagues.length})`
-                : ''}
-              {tab === 'players' && searchPlayers.length > 0
-                ? ` (${searchPlayers.length})`
-                : ''}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              onPress={() => handleTabChange(tab)}>
+              <Text
+                style={[
+                  styles.tabText,
+                  isActive && styles.tabTextActive,
+                  {
+                    color: isActive
+                      ? activeTheme.colors.primary
+                      : activeTheme.colors.textSecondary,
+                  },
+                ]}>
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'teams' && searchTeams.length > 0
+                  ? ` (${searchTeams.length})`
+                  : ''}
+                {tab === 'leagues' && searchLeagues.length > 0
+                  ? ` (${searchLeagues.length})`
+                  : ''}
+                {tab === 'players' && searchPlayers.length > 0
+                  ? ` (${searchPlayers.length})`
+                  : ''}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
-      {/* Results */}
       <View style={styles.results}>{renderContent()}</View>
     </View>
   );
@@ -339,31 +429,30 @@ export const SearchScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
     margin: theme.spacing.md,
-    paddingHorizontal: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
+    paddingLeft: theme.spacing.md,
+    paddingRight: theme.spacing.xs,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: theme.colors.border,
     minHeight: theme.layout.touchTargets.minHeight,
+  },
+  searchIcon: {
+    marginRight: theme.spacing.sm,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: theme.colors.textPrimary,
     paddingVertical: theme.spacing.sm,
   },
   clearButton: {
-    paddingLeft: theme.spacing.sm,
-  },
-  clearText: {
-    color: theme.colors.textSecondary,
-    fontSize: 16,
+    minWidth: theme.layout.touchTargets.minWidth,
+    minHeight: theme.layout.touchTargets.minHeight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabs: {
     flexDirection: 'row',
@@ -379,16 +468,11 @@ const styles = StyleSheet.create({
     minHeight: theme.layout.touchTargets.minHeight,
     justifyContent: 'center',
   },
-  tabActive: {
-    borderBottomColor: theme.colors.primary,
-  },
   tabText: {
     fontSize: 13,
-    color: theme.colors.textSecondary,
     fontWeight: '500',
   },
   tabTextActive: {
-    color: theme.colors.primary,
     fontWeight: '700',
   },
   results: {
@@ -403,8 +487,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    backgroundColor: theme.colors.surface,
     borderRadius: 10,
+    borderWidth: 1,
     marginBottom: theme.spacing.sm,
     minHeight: theme.layout.touchTargets.minHeight,
   },
@@ -415,7 +499,8 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.md,
   },
   badgePlaceholder: {
-    backgroundColor: theme.colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   rowText: {
     flex: 1,
@@ -423,11 +508,9 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: theme.colors.textPrimary,
   },
   rowSubtitle: {
     fontSize: 13,
-    color: theme.colors.textSecondary,
     marginTop: 2,
   },
 });

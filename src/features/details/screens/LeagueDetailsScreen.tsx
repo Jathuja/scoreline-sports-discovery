@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/Feather';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import {
   getLeagueDetailsThunk,
@@ -17,9 +18,14 @@ import {
 } from '../../discovery/slices/discoverySlice';
 import { toggleFavouriteThunk } from '../../favourites/slices/favouritesSlice';
 import { shareLeague } from '../../../services/share';
-import { theme } from '../../../theme';
+import { theme, useAppTheme } from '../../../theme';
 import { LoadingView, ErrorView } from '../../../components';
 import { RootStackParamList } from '../../../navigation/types';
+import {
+  DetailsActionBar,
+  DetailsInfoRow,
+  DeepLinkBanner,
+} from '../components/DetailsShared';
 
 type LeagueDetailsRouteProp = RouteProp<RootStackParamList, 'LeagueDetails'>;
 type LeagueDetailsNavProp = NativeStackNavigationProp<RootStackParamList>;
@@ -28,9 +34,9 @@ export const LeagueDetailsScreen: React.FC = () => {
   const route = useRoute<LeagueDetailsRouteProp>();
   const navigation = useNavigation<LeagueDetailsNavProp>();
   const dispatch = useAppDispatch();
-  const { selectedLeague, leagueTeams, isLoadingDetails, detailsError } = useAppSelector(
-    state => state.discovery,
-  );
+  const activeTheme = useAppTheme();
+  const { selectedLeague, leagueTeams, isLoadingDetails, detailsError } =
+    useAppSelector(state => state.discovery);
   const favourites = useAppSelector(state => state.favourites.items);
 
   const { id, name } = route.params;
@@ -84,9 +90,8 @@ export const LeagueDetailsScreen: React.FC = () => {
   return (
     <ScrollView
       testID="league-details-screen"
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
+      style={[styles.container, { backgroundColor: activeTheme.colors.background }]}
+      contentContainerStyle={styles.content}>
       {league.strBadge ? (
         <Image
           testID="league-badge"
@@ -95,56 +100,49 @@ export const LeagueDetailsScreen: React.FC = () => {
           resizeMode="contain"
         />
       ) : (
-        <View testID="league-badge-placeholder" style={styles.badgePlaceholder} />
+        <View
+          testID="league-badge-placeholder"
+          style={[
+            styles.badgePlaceholder,
+            { backgroundColor: activeTheme.colors.surfaceSubtle },
+          ]}>
+          <Icon name="award" size={44} color={activeTheme.colors.primary} />
+        </View>
       )}
 
-      <Text testID="league-name" style={styles.name}>
+      <Text
+        testID="league-name"
+        style={[styles.name, { color: activeTheme.colors.textPrimary }]}>
         {league.strLeague}
       </Text>
 
-      <View style={styles.actions}>
-        <TouchableOpacity
-          testID="share-button"
-          style={styles.actionButton}
-          onPress={handleShare}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.actionIcon}>↗</Text>
-          <Text style={styles.actionLabel}>Share</Text>
-        </TouchableOpacity>
+      <DetailsActionBar
+        onShare={handleShare}
+        onToggleFavourite={handleToggleFavourite}
+        isFavourite={isFavourite}
+      />
 
-        <TouchableOpacity
-          testID="favourite-button"
-          style={[styles.actionButton, isFavourite && styles.actionButtonActive]}
-          onPress={handleToggleFavourite}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.actionIcon}>{isFavourite ? '♥' : '♡'}</Text>
-          <Text style={[styles.actionLabel, isFavourite && styles.actionLabelActive]}>
-            {isFavourite ? 'Saved' : 'Favourite'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View testID="league-info" style={styles.infoCard}>
+      <View
+        testID="league-info"
+        style={[styles.card, { backgroundColor: activeTheme.colors.surface }]}>
         {league.strSport ? (
-          <InfoRow label="Sport" value={league.strSport} testID="league-sport" />
+          <DetailsInfoRow label="Sport" value={league.strSport} testID="league-sport" />
         ) : null}
         {league.strCountry ? (
-          <InfoRow label="Country" value={league.strCountry} testID="league-country" />
+          <DetailsInfoRow label="Country" value={league.strCountry} testID="league-country" />
         ) : null}
         {league.strCurrentSeason ? (
-          <InfoRow
+          <DetailsInfoRow
             label="Season"
             value={league.strCurrentSeason}
             testID="league-season"
           />
         ) : null}
         {league.strGender ? (
-          <InfoRow label="Gender" value={league.strGender} testID="league-gender" />
+          <DetailsInfoRow label="Gender" value={league.strGender} testID="league-gender" />
         ) : null}
         {league.intFormedYear ? (
-          <InfoRow label="Founded" value={league.intFormedYear} testID="league-founded" />
+          <DetailsInfoRow label="Founded" value={league.intFormedYear} testID="league-founded" />
         ) : null}
       </View>
 
@@ -158,66 +156,96 @@ export const LeagueDetailsScreen: React.FC = () => {
       ) : null}
 
       {league.strDescriptionEN ? (
-        <View style={styles.descriptionCard}>
-          <Text style={styles.descriptionTitle}>About</Text>
-          <Text testID="league-description" style={styles.description}>
+        <View style={[styles.card, { backgroundColor: activeTheme.colors.surface }]}>
+          <Text
+            style={[styles.cardTitle, { color: activeTheme.colors.textPrimary }]}>
+            About
+          </Text>
+          <Text
+            testID="league-description"
+            style={[styles.description, { color: activeTheme.colors.textSecondary }]}>
             {league.strDescriptionEN}
           </Text>
         </View>
       ) : null}
 
       {leagueTeams.length > 0 ? (
-        <View testID="league-teams-card" style={styles.descriptionCard}>
-          <Text style={styles.descriptionTitle}>
+        <View
+          testID="league-teams-card"
+          style={[styles.card, { backgroundColor: activeTheme.colors.surface }]}>
+          <Text
+            style={[styles.cardTitle, { color: activeTheme.colors.textPrimary }]}>
             Teams ({leagueTeams.length})
           </Text>
-          {leagueTeams.map(team => (
-            <TouchableOpacity
-              key={team.idTeam}
-              testID={`league-team-${team.idTeam}`}
-              style={styles.teamRow}
-              onPress={() =>
-                navigation.navigate('TeamDetails', {
-                  id: team.idTeam,
-                  name: team.strTeam,
-                })
-              }
-              activeOpacity={0.7}
-            >
-              <View style={styles.teamInfo}>
-                <Text style={styles.teamName}>{team.strTeam}</Text>
-                {team.strStadium ? (
-                  <Text style={styles.teamMeta}>{team.strStadium}</Text>
-                ) : null}
-              </View>
-              <Text style={styles.teamChevron}>›</Text>
-            </TouchableOpacity>
-          ))}
+          {leagueTeams.map(team => {
+            const teamBadge = team.strBadge || team.strTeamBadge;
+            return (
+              <TouchableOpacity
+                key={team.idTeam}
+                testID={`league-team-${team.idTeam}`}
+                style={[
+                  styles.teamRow,
+                  { borderBottomColor: activeTheme.colors.border },
+                ]}
+                onPress={() =>
+                  navigation.navigate('TeamDetails', {
+                    id: team.idTeam,
+                    name: team.strTeam,
+                  })
+                }
+                activeOpacity={0.7}>
+                {teamBadge ? (
+                  <Image
+                    source={{ uri: teamBadge }}
+                    style={styles.teamBadge}
+                    resizeMode="contain"
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.teamBadge,
+                      styles.teamBadgePlaceholder,
+                      { backgroundColor: activeTheme.colors.surfaceSubtle },
+                    ]}>
+                    <Icon name="shield" size={16} color={activeTheme.colors.primary} />
+                  </View>
+                )}
+                <View style={styles.teamInfo}>
+                  <Text
+                    style={[
+                      styles.teamName,
+                      { color: activeTheme.colors.textPrimary },
+                    ]}>
+                    {team.strTeam}
+                  </Text>
+                  {team.strStadium ? (
+                    <Text
+                      style={[
+                        styles.teamMeta,
+                        { color: activeTheme.colors.textSecondary },
+                      ]}>
+                      {team.strStadium}
+                    </Text>
+                  ) : null}
+                </View>
+                <Icon
+                  name="chevron-right"
+                  size={18}
+                  color={activeTheme.colors.textSecondary}
+                />
+              </TouchableOpacity>
+            );
+          })}
         </View>
       ) : null}
 
-      <View style={styles.deepLinkCard}>
-        <Text style={styles.deepLinkText}>🔗 scoreline://league/{id}</Text>
-      </View>
+      <DeepLinkBanner uri={`scoreline://league/${id}`} />
     </ScrollView>
   );
 };
 
-interface InfoRowProps {
-  label: string;
-  value: string;
-  testID?: string;
-}
-
-const InfoRow: React.FC<InfoRowProps> = ({ label, value, testID }) => (
-  <View testID={testID} style={styles.infoRow}>
-    <Text style={styles.infoLabel}>{label}</Text>
-    <Text style={styles.infoValue}>{value}</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.background },
+  container: { flex: 1 },
   content: { padding: theme.spacing.md, paddingBottom: 48 },
   badge: {
     width: 120,
@@ -228,60 +256,27 @@ const styles = StyleSheet.create({
   badgePlaceholder: {
     width: 120,
     height: 120,
-    borderRadius: 12,
-    backgroundColor: theme.colors.border,
+    borderRadius: 60,
     alignSelf: 'center',
     marginBottom: theme.spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   name: {
     fontSize: 24,
     fontWeight: '800',
-    color: theme.colors.textPrimary,
     textAlign: 'center',
     marginBottom: theme.spacing.md,
   },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.lg,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-    minHeight: theme.layout.touchTargets.minHeight,
-    gap: 6,
-  },
-  actionButtonActive: { backgroundColor: theme.colors.primary },
-  actionIcon: { fontSize: 18, color: theme.colors.primary },
-  actionLabel: { fontSize: 14, fontWeight: '600', color: theme.colors.primary },
-  actionLabelActive: { color: theme.colors.background },
-  infoCard: {
-    backgroundColor: theme.colors.surface,
+  card: {
     borderRadius: 12,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.colors.border,
-  },
-  infoLabel: { fontSize: 13, color: theme.colors.textSecondary, fontWeight: '500' },
-  infoValue: {
-    fontSize: 13,
-    color: theme.colors.textPrimary,
-    fontWeight: '600',
-    flexShrink: 1,
-    textAlign: 'right',
-    marginLeft: theme.spacing.sm,
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: theme.spacing.sm,
   },
   banner: {
     width: '100%',
@@ -289,39 +284,28 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: theme.spacing.md,
   },
-  descriptionCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-  },
-  descriptionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.textPrimary,
-    marginBottom: theme.spacing.sm,
-  },
-  description: { fontSize: 14, lineHeight: 22, color: theme.colors.textSecondary },
-  deepLinkCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: theme.spacing.md,
-    alignItems: 'center',
-  },
-  deepLinkText: { fontSize: 12, color: theme.colors.primary, fontFamily: 'monospace' },
+  description: { fontSize: 14, lineHeight: 22 },
   teamRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: theme.spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.colors.border,
     minHeight: theme.layout.touchTargets.minHeight,
   },
+  teamBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    marginRight: theme.spacing.sm,
+  },
+  teamBadgePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   teamInfo: { flex: 1 },
-  teamName: { fontSize: 14, fontWeight: '600', color: theme.colors.textPrimary },
-  teamMeta: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 2 },
-  teamChevron: { fontSize: 18, color: theme.colors.textSecondary, marginLeft: theme.spacing.sm },
+  teamName: { fontSize: 14, fontWeight: '600' },
+  teamMeta: { fontSize: 12, marginTop: 2 },
 });
 
 export default LeagueDetailsScreen;

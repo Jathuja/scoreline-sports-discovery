@@ -1,32 +1,27 @@
-import { colors, ThemeColors } from './colors';
-import { typography, TypographyTokens } from './typography';
-import { spacing, SpacingTokens } from './spacing';
-import { layout, LayoutTokens } from './layout';
-
-export interface AppTheme {
-  colors: ThemeColors;
-  typography: TypographyTokens;
-  spacing: SpacingTokens;
-  layout: LayoutTokens;
-  isDark: boolean;
-}
-
-export const lightTheme: AppTheme = {
-  colors: colors.light,
-  typography,
-  spacing,
-  layout,
-  isDark: false,
-};
-
-export const darkTheme: AppTheme = {
-  colors: colors.dark,
-  typography,
-  spacing,
-  layout,
-  isDark: true,
-};
+import { colors } from './colors';
+import { typography } from './typography';
+import { spacing } from './spacing';
+import { layout } from './layout';
+import {
+  AppTheme,
+  lightTheme,
+  darkTheme,
+  ThemeContext,
+  ThemeProvider,
+  useAppTheme,
+} from './ThemeContext';
 
 export const theme = lightTheme;
 
-export { colors, typography, spacing, layout };
+export type { AppTheme };
+export {
+  colors,
+  typography,
+  spacing,
+  layout,
+  lightTheme,
+  darkTheme,
+  ThemeContext,
+  ThemeProvider,
+  useAppTheme,
+};

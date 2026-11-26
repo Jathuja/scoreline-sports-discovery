@@ -1,3 +1,4 @@
+import { getStateFromPath } from '@react-navigation/native';
 import { linking } from '../src/navigation/linking';
 
 describe('Deep Link Configuration', () => {
@@ -41,5 +42,40 @@ describe('Deep Link Configuration', () => {
     expect(main.screens.SearchTab).toBe('search');
     expect(main.screens.FavouritesTab).toBe('favourites');
     expect(main.screens.ProfileTab).toBe('profile');
+  });
+
+  it('resolves team/:id deep link path to TeamDetails with item ID', () => {
+    const state = getStateFromPath('team/133604', linking.config);
+    expect(state?.routes[0]).toEqual(
+      expect.objectContaining({
+        name: 'TeamDetails',
+        params: { id: '133604' },
+      }),
+    );
+  });
+
+  it('resolves league/:id deep link path to LeagueDetails with item ID', () => {
+    const state = getStateFromPath('league/4328', linking.config);
+    expect(state?.routes[0]).toEqual(
+      expect.objectContaining({
+        name: 'LeagueDetails',
+        params: { id: '4328' },
+      }),
+    );
+  });
+
+  it('resolves player/:id deep link path to PlayerDetails with item ID', () => {
+    const state = getStateFromPath('player/34145361', linking.config);
+    expect(state?.routes[0]).toEqual(
+      expect.objectContaining({
+        name: 'PlayerDetails',
+        params: { id: '34145361' },
+      }),
+    );
+  });
+
+  it('returns undefined for unrecognized deep link paths', () => {
+    const state = getStateFromPath('unknown/999', linking.config);
+    expect(state).toBeUndefined();
   });
 });
