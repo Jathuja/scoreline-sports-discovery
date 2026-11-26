@@ -32,6 +32,7 @@ describe('State Feedback Views', () => {
       );
 
       expect(getByTestId('error-view')).toBeTruthy();
+      expect(getByTestId('error-view-icon')).toBeTruthy();
       expect(getByText('Network Failure')).toBeTruthy();
       expect(getByText('Could not reach TheSportsDB.')).toBeTruthy();
     });
@@ -62,6 +63,7 @@ describe('State Feedback Views', () => {
       );
 
       expect(getByTestId('empty-state-view')).toBeTruthy();
+      expect(getByTestId('empty-state-view-icon')).toBeTruthy();
       expect(getByText('No Teams Found')).toBeTruthy();
       expect(getByText('No matching teams found in this league.')).toBeTruthy();
     });

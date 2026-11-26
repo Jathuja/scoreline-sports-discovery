@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { theme } from '../../theme';
+import { useAppTheme } from '../../theme';
 
 export interface ScreenContainerProps {
   children: React.ReactNode;
@@ -14,13 +14,27 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
   style,
   testID = 'screen-container',
 }) => {
+  const activeTheme = useAppTheme();
+
   return (
-    <SafeAreaView style={styles.safeArea} testID={testID}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: activeTheme.colors.background }]}
+      testID={testID}>
       <StatusBar
-        barStyle={theme.isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.colors.background}
+        barStyle={activeTheme.isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={activeTheme.colors.background}
       />
-      <View style={[styles.container, style]}>{children}</View>
+      <View
+        style={[
+          styles.container,
+          {
+            paddingHorizontal: activeTheme.spacing.md,
+            paddingVertical: activeTheme.spacing.sm,
+          },
+          style,
+        ]}>
+        {children}
+      </View>
     </SafeAreaView>
   );
 };
@@ -28,11 +42,8 @@ export const ScreenContainer: React.FC<ScreenContainerProps> = ({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.background,
   },
   container: {
     flex: 1,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
   },
 });

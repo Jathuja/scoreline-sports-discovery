@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../../store';
 import { loginThunk, clearAuthError } from '../slices/authSlice';
-import { theme } from '../../../theme';
+import { theme, useAppTheme } from '../../../theme';
 import { Typography } from '../../../components/common/Typography';
 import { Button } from '../../../components/common/Button';
 import { Input } from '../../../components/common/Input';
@@ -15,6 +15,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onNavigateToRegister,
 }) => {
   const dispatch = useAppDispatch();
+  const activeTheme = useAppTheme();
   const { isLoading, error } = useAppSelector(state => state.auth);
 
   const [username, setUsername] = useState('');
@@ -72,7 +73,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         </Typography>
       </View>
 
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: activeTheme.colors.surface,
+            borderColor: activeTheme.colors.border,
+          },
+        ]}>
         <Typography variant="h3" style={styles.cardTitle}>
           Welcome Back
         </Typography>

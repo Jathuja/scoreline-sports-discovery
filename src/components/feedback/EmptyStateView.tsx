@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import Icon from 'react-native-vector-icons/Feather';
+import { useAppTheme } from '../../theme';
 import { Typography } from '../common/Typography';
 import { Button } from '../common/Button';
 import { StateFeedbackProps } from '../../types/common';
@@ -8,6 +9,7 @@ import { StateFeedbackProps } from '../../types/common';
 export interface EmptyStateViewProps extends StateFeedbackProps {
   actionText?: string;
   onAction?: () => void;
+  icon?: string;
   style?: StyleProp<ViewStyle>;
 }
 
@@ -16,20 +18,30 @@ export const EmptyStateView: React.FC<EmptyStateViewProps> = ({
   message = 'There is currently no sports data available to display.',
   actionText,
   onAction,
+  icon = 'inbox',
   style,
   testID = 'empty-state-view',
   children,
 }) => {
+  const activeTheme = useAppTheme();
+
   return (
     <View
       style={[styles.container, style]}
       testID={testID}
       accessibilityRole="text"
       accessibilityLabel={`${title}. ${message}`}>
-      <View style={styles.badge}>
-        <Typography variant="h3" color="secondary" align="center">
-          ∅
-        </Typography>
+      <View
+        style={[
+          styles.badge,
+          { backgroundColor: activeTheme.colors.surfaceSubtle },
+        ]}>
+        <Icon
+          name={icon}
+          size={24}
+          color={activeTheme.colors.textSecondary}
+          testID={`${testID}-icon`}
+        />
       </View>
       <Typography variant="h3" align="center" style={styles.title}>
         {title}
@@ -62,22 +74,21 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: 32,
   },
   badge: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: theme.colors.surfaceSubtle,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: 16,
   },
   title: {
-    marginBottom: theme.spacing.xs,
+    marginBottom: 4,
   },
   message: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: 24,
   },
   button: {
     minWidth: 140,

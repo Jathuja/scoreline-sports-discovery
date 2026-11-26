@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { loadThemeMode, saveThemeMode } from '../../services/storage';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -14,6 +15,22 @@ const initialState: AppState = {
   isOnline: true,
 };
 
+export const loadThemeThunk = createAsyncThunk<ThemeMode, void>(
+  'app/loadTheme',
+  async () => {
+    const saved = await loadThemeMode();
+    return saved ?? 'light';
+  },
+);
+
+export const saveThemeModeThunk = createAsyncThunk<ThemeMode, ThemeMode>(
+  'app/saveTheme',
+  async mode => {
+    await saveThemeMode(mode);
+    return mode;
+  },
+);
+
 export const appSlice = createSlice({
   name: 'app',
   initialState,
@@ -28,6 +45,14 @@ export const appSlice = createSlice({
       state.isOnline = action.payload;
     },
     resetAppState: () => initialState,
+  },
+  extraReducers: builder => {
+    builder.addCase(loadThemeThunk.fulfilled, (state, action) => {
+      state.themeMode = action.payload;
+    });
+    builder.addCase(saveThemeModeThunk.fulfilled, (state, action) => {
+      state.themeMode = action.payload;
+    });
   },
 });
 

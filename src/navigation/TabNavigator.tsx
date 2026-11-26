@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Feather';
-import { theme } from '../theme';
+import { theme, useAppTheme } from '../theme';
 import { HomeScreen } from '../features/home/screens/HomeScreen';
 import { SearchScreen } from '../features/search/screens/SearchScreen';
 import { FavouritesScreen } from '../features/favourites/screens/FavouritesScreen';
@@ -28,16 +28,33 @@ const renderProfileIcon = ({ color, size }: { color: string; size: number }) => 
 );
 
 export const TabNavigator: React.FC = () => {
+  const activeTheme = useAppTheme();
+
   return (
     <Tab.Navigator
       initialRouteName="HomeTab"
       screenOptions={{
-        headerStyle: styles.header,
-        headerTintColor: theme.colors.textPrimary,
-        headerTitleStyle: styles.headerTitle,
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.textTertiary,
-        tabBarStyle: styles.tabBar,
+        headerStyle: [
+          styles.header,
+          {
+            backgroundColor: activeTheme.colors.surface,
+            borderBottomColor: activeTheme.colors.border,
+          },
+        ],
+        headerTintColor: activeTheme.colors.textPrimary,
+        headerTitleStyle: [
+          styles.headerTitle,
+          { color: activeTheme.colors.textPrimary },
+        ],
+        tabBarActiveTintColor: activeTheme.colors.primary,
+        tabBarInactiveTintColor: activeTheme.colors.textTertiary,
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            backgroundColor: activeTheme.colors.surface,
+            borderTopColor: activeTheme.colors.border,
+          },
+        ],
         tabBarItemStyle: styles.tabBarItem,
         tabBarLabelStyle: styles.tabBarLabel,
       }}>
@@ -87,20 +104,15 @@ export const TabNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: theme.colors.surface,
     elevation: 0,
     shadowOpacity: 0,
     borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
   },
   headerTitle: {
     fontWeight: theme.typography.fontWeights.semiBold,
     fontSize: theme.typography.fontSizes.lg,
-    color: theme.colors.textPrimary,
   },
   tabBar: {
-    backgroundColor: theme.colors.surface,
-    borderTopColor: theme.colors.border,
     borderTopWidth: 1,
     height: 64,
     paddingBottom: theme.spacing.xs,

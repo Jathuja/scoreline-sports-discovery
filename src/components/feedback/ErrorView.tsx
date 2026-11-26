@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { theme } from '../../theme';
+import Icon from 'react-native-vector-icons/Feather';
+import { useAppTheme } from '../../theme';
 import { Typography } from '../common/Typography';
 import { Button } from '../common/Button';
 import { StateFeedbackProps } from '../../types/common';
@@ -18,16 +19,25 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
   testID = 'error-view',
   children,
 }) => {
+  const activeTheme = useAppTheme();
+
   return (
     <View
       style={[styles.container, style]}
       testID={testID}
       accessibilityRole="alert"
       accessibilityLabel={`${title}. ${message}`}>
-      <View style={styles.badge}>
-        <Typography variant="h3" color="error" align="center">
-          !
-        </Typography>
+      <View
+        style={[
+          styles.badge,
+          { backgroundColor: `${activeTheme.colors.error}15` },
+        ]}>
+        <Icon
+          name="alert-circle"
+          size={24}
+          color={activeTheme.colors.error}
+          testID={`${testID}-icon`}
+        />
       </View>
       <Typography variant="h3" align="center" style={styles.title}>
         {title}
@@ -47,6 +57,7 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
           title={retryButtonText}
           onPress={onRetry}
           variant="primary"
+          icon="refresh-cw"
           style={styles.button}
           testID={`${testID}-retry-button`}
         />
@@ -60,22 +71,21 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.xl,
+    padding: 32,
   },
   badge: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: `${theme.colors.error}15`,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: 16,
   },
   title: {
-    marginBottom: theme.spacing.xs,
+    marginBottom: 4,
   },
   message: {
-    marginBottom: theme.spacing.lg,
+    marginBottom: 24,
   },
   button: {
     minWidth: 140,
